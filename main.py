@@ -1,12 +1,14 @@
 from flask import Flask, request, jsonify
 import os
-import openai
 from dotenv import load_dotenv
+import openai
 
 load_dotenv()
-openai.api_key = os.getenv("OPENAI_API_KEY")
 
 app = Flask(__name__)
+
+# OpenAI 클라이언트 설정
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 @app.route("/summary", methods=["POST"])
 def summarize():
@@ -16,11 +18,11 @@ def summarize():
     if not youtube_url:
         return jsonify({"error": "YouTube URL is required"}), 400
 
-    # TODO: Whisper로 텍스트 추출할 부분, 현재는 더미 텍스트로 대체
+    # Whisper 자막 추출 자리 (지금은 임시 텍스트)
     transcript = "이건 예시 자막입니다. 실제로는 whisper로 추출한 텍스트가 여기에 들어갑니다."
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "당신은 요리 영상을 요약하는 요약가입니다."},
@@ -28,6 +30,7 @@ def summarize():
             ],
             temperature=0.7
         )
+
         summary = response.choices[0].message.content.strip()
 
     except Exception as e:
