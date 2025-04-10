@@ -7,8 +7,8 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# OpenAI 클라이언트 설정
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# OpenAI API 키 설정
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/summary", methods=["POST"])
 def summarize():
@@ -22,7 +22,7 @@ def summarize():
     transcript = "이건 예시 자막입니다. 실제로는 whisper로 추출한 텍스트가 여기에 들어갑니다."
 
     try:
-        response = client.chat.completions.create(
+        response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=[
                 {"role": "system", "content": "당신은 요리 영상을 요약하는 요약가입니다."},
@@ -31,7 +31,7 @@ def summarize():
             temperature=0.7
         )
 
-        summary = response.choices[0].message.content.strip()
+        summary = response.choices[0].message["content"].strip()
 
     except Exception as e:
         return jsonify({"error": "GPT 호출 실패", "details": str(e)}), 500
